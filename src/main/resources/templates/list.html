@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Title</title>
+</head>
+<body>
+
+    <div th:if="${param.my_error != null}" th:text="${param.my_error}"></div>
+    <div th:if="${param.my_success != null}" th:text="${param.my_success}"></div>
+
+    <h1 th:text="${title}"></h1>
+
+    <a th:href="@{/form}">Create +</a>
+
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="product: ${products}">
+                <td th:text="${product.id}"></td>
+                <td th:text="${product.name}"></td>
+                <td th:text="${product.price}"></td>
+                <td th:text="${product.createAt}"></td>
+                <td th:text="${product.category.name}"></td>
+                <!-- <td><a th:href="@{/form/v1/} + ${product.id}">edit</a></td> -->
+                <td><a th:href="@{/form/v2/} + ${product.id}">edit</a></td>
+                <td><a th:href="@{/delete/} + ${product.id}" onclick="return confirm('are you sure to delete this product?');">delete</a></td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

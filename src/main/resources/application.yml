@@ -1,0 +1,9 @@
+
+# If MongoDB running on localhost not need for this configuration
+spring:
+  data:
+    mongodb:
+      # uri: mongodb://localhost:27017/mydb
+      host: 192.168.50.252
+      port: 27017
+      database: enterprise

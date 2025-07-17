@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Title</title>
+</head>
+<body>
+
+    <h1 th:text="${title}"></h1>
+
+    <div>
+        <a th:href="@{/list}">List</a>
+
+        <form th:action="@{/form}" method="post" th:object="${product}">
+            <!-- <input th:if="${product.id != null}" type="hidden" th:field="*{id}" /> -->
+            <!--
+                Handling product exists with hidden id field.
+                Currently handling with Spring Session "If we use @GetMapping("/form/v1/{id}") in list.html
+                otherwise @GetMapping("/form/v2/{id}") we use them hidden id, so uncomment the <input type="hidden" .../>
+                above!.
+
+                @SessionAttributes("product") // used to recover the id in case of updating
+                @Controller
+                public class ProductController { }
+            -->
+            <div>
+                <label for="name">Name</label>
+                <div><input type="text" id="name" th:field="*{name}" /></div>
+                <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></small>
+            </div>
+            <div>
+                <label for="price">Price</label>
+                <div><input type="number" id="price" th:field="*{price}" /></div>
+                <small th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></small>
+            </div>
+            <div>
+                <label for="date">Date</label>
+                <div><input type="date" id="date" th:field="*{createAt}" /></div>
+            </div>
+            <div>
+                <label for="category.id">Category</label>
+                <div>
+                    <select th:field="*{category.id}">
+                        <option value="">-- Select --</option>
+                        <option th:each="category: ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                    </select>
+                </div>
+                <small th:if="${#fields.hasErrors('category.id')}" th:errors="*{category.id}"></small>
+            </div>
+            <div>
+                <div><input type="submit" th:value="${buttonName}" /></div>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>
