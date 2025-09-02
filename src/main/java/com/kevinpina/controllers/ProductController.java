@@ -7,9 +7,11 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Collation;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,8 +21,10 @@ import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.Date;
+import java.util.UUID;
 
 @SessionAttributes("product") // used to recover the id in case of updating
 @Controller
@@ -35,6 +39,9 @@ public class ProductController {
     @Autowired
     private ReactiveMongoTemplate mongoTemplate;
 
+    @Value("${config.upload.path}")
+    private String path;
+
     @GetMapping({"/list", "/"})
     private String listProduct(Model model) {
         Flux<Product> products = productService.findAll();
@@ -48,12 +55,13 @@ public class ProductController {
     @PostMapping("/form")
     // public Mono<String> save(Product product, SessionStatus sessionStatus) {
     //public Mono<String> save(@Valid @ModelAttribute("product") Product product, BindingResult result, Model model, SessionStatus sessionStatus) {
-    public Mono<String> save(@Valid Product product, BindingResult result, Model model, SessionStatus sessionStatus) {
+    public Mono<String> save(@Valid Product product, BindingResult result, Model model, @RequestPart("filePic") FilePart filePart, SessionStatus sessionStatus) {
         // 1. @Valid for Validating the fields of Product.class
         // 2. Always methodName(@Valid Product product, BindingResult result, and then the rest...) {}
         // 3. No need to use methodName(@Valid @ModelAttribute("product") Product product, and then the rest...) {}
         //    because the object Product is the same in model.addAttribute("product", ...);
         //    not the name of the variable is the Class.
+    	// 4. If in form.html <input type="file" name="picture" /> @RequestPart FilePart picture; otherwise @RequestPart(name = "MyNameAttribute") FilePart picture
 
         if (result.hasErrors()) {
             model.addAttribute("title", "Form Product Errors");
@@ -67,12 +75,28 @@ public class ProductController {
             product.setCreateAt(new Date());
         }
 
+        if (!filePart.filename().isEmpty()) {
+        	product.setPicture(UUID.randomUUID().toString() + "_" + filePart.filename()
+        	.replace(" ", "")
+        	.replace(":", "")
+        	.replace("\\", ""));
+        }
+
         Mono<Category> category = productService.findCategoryById(product.getCategory().getId());
+
         return category.flatMap(c -> {
 			product.setCategory(c);
 			return productService.save(product);
-        }).doOnNext(p -> log.info(p.toString()))
-        .thenReturn("redirect:/list?my_success=product+saved+successfully");
+        })
+        		.doOnNext(p -> log.info(p.toString()))
+        		.flatMap(p -> {
+        			 if (!filePart.filename().isEmpty()) {
+        				 return filePart.transferTo(new File(path + p.getPicture()));
+        			 } else {
+        				 return Mono.empty();
+        			 }
+        		})
+        		.thenReturn("redirect:/list?my_success=product+saved+successfully");
 
         //return productService.save(product)
         //        .doOnNext(p -> log.info(p.toString()))

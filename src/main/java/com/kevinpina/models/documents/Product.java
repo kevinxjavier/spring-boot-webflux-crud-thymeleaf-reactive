@@ -1,14 +1,19 @@
 package com.kevinpina.models.documents;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import lombok.*;
+import java.util.Date;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.validation.BindingResult;
 
-import java.util.Date;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Data
 @ToString
@@ -35,6 +40,7 @@ public class Product {
     @Valid // Used for validation in ProductController.save(..., BindingResult result,...);
     @NonNull // Used for Constructor required @RequiredArgsConstructor
     private Category category;
-
+    
+    private String picture;
 
 }
