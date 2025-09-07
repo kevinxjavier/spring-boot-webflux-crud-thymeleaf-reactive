@@ -50,6 +50,73 @@ For further reference, please consider the following sections:
 		  		net:
 				  port: 27017
 				  bindIp: 0.0.0.0
+
+	# Enabled MongoDB User/Password
+		## Create User admin:
+			$ mongosh
+				> use admin
+				> db.createUser({
+				  user: "admin",
+					pwd: "MyPassword",
+					roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+				})
+
+		## Create UserApp "kevin"
+			$ mongosh
+				> use enterprise
+				> db.createUser({
+				  user: "kevin",
+				  pwd: "MyPassword",
+				  roles: [ { role: "readWrite", db: "enterprise" } ]
+				})
+
+		## Show Users
+			> use admin
+			> db.system.users.find();
+
+		## Activar autenticacion 
+			$ vi /etc/mongod.conf
+				security:
+					authorization: enabled
+
+		## Reinicia MongoDB
+			$ sudo systemctl restart mongod
+
+		## Login as admin
+			$ mongosh -u "admin" -p "MyPassword" --authenticationDatabase "admin"
+
+		## Loin as kevin
+			$ mongosh -u kevin -p --authenticationDatabase enterprise
+
+		## Add Access to Other Database  
+			# Log as admin
+			$ mongosh -u "admin" -p "MyPassword" --authenticationDatabase "admin"
+
+				> use newDataBase
+				
+				> db.grantRolesToUser("myUser1", [
+					{ role: "readWrite", db: "newDataBase" }
+				])
+
+				> db.grantRolesToUser("myUser2", [
+					{ role: "readWrite", db: "newDataBase" },
+					{ role: "dbAdmin", db: "otherDataBase" }
+				])
+
+				> db.getUsers();
+				
+				> db.getUser("myUser1");    # Log as myUser1 (or as admin then > use newDataBase, then execute this command will show the permissions.
+
+				-- Roles: 
+					* readWrite: Allows reading and writing to the database.
+					* read: Allows only reading data from the database.
+					* dbAdmin: Allows managing the database (e.g., creating indexes).
+					* userAdmin: Allows managing users and roles within a database.
+
+				-- Global Roles: 
+					* readWriteAnyDatabase
+					* dbAdminAnyDatabase
+					* userAdminAnyDatabase
 ```
 
 ### Examples MongoDB
@@ -62,8 +129,9 @@ For further reference, please consider the following sections:
 		$ show dbs
 		
 	# Change/Create db
-		$ use mydb
-	
+		$ use mydb	# This switches to mydb, and automatically creates it when you insert data. 
+						# Now insert something to actually create the DB.
+
 	# Show Collections "like Tables"
 		$ show collections
 	

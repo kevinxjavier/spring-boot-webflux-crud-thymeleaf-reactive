@@ -16,7 +16,7 @@ public class Category {
 	@NotEmpty // Used for validation in ProductController.save(..., BindingResult result,...);
     private String id;
 
-    @NonNull
+    @NonNull // Used for Constructor required @RequiredArgsConstructor
     private String name;
 
 }

@@ -3,7 +3,10 @@
 spring:
   data:
     mongodb:
-      # uri: mongodb://localhost:27017/mydb
+      # uri: mongodb://<host>:<port>/<database>
+      # uri: mongodb://<username>:<password>@<host>:<port>/<database> # Optional if authentication is required
       host: 192.168.50.252
       port: 27017
       database: enterprise
+      username: kevin             # Optional if authentication is required
+      password: mypassword        # Optional if authentication is required
